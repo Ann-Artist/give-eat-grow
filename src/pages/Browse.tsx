@@ -14,46 +14,46 @@ const Browse = () => {
   const donations = [
     {
       id: 1,
-      donor: "Green Valley Restaurant",
+      donor: "Koregaon Park Restaurant",
       foodType: "Prepared Meals",
-      quantity: "25kg",
+      quantity: "25 kg",
       servings: "50",
-      distance: "1.2km",
+      distance: "1.2 km",
       expiry: "4 hours",
-      location: "123 Main St, Downtown",
+      location: "North Main Road, Koregaon Park",
       urgent: true,
     },
     {
       id: 2,
-      donor: "Downtown Bakery",
+      donor: "Viman Nagar Bakery",
       foodType: "Bread & Pastries",
-      quantity: "15kg",
+      quantity: "15 kg",
       servings: "30",
-      distance: "2.5km",
+      distance: "2.5 km",
       expiry: "6 hours",
-      location: "456 Oak Ave, City Center",
+      location: "Phoenix Marketcity Area, Viman Nagar",
       urgent: false,
     },
     {
       id: 3,
-      donor: "Fresh Market",
+      donor: "Shivajinagar Fresh Market",
       foodType: "Vegetables & Fruits",
-      quantity: "40kg",
+      quantity: "40 kg",
       servings: "80",
-      distance: "3.1km",
+      distance: "3.1 km",
       expiry: "12 hours",
-      location: "789 Market St, Eastside",
+      location: "Near Shivaji Market, Shivajinagar",
       urgent: false,
     },
     {
       id: 4,
-      donor: "City Event Center",
+      donor: "Hinjewadi IT Park Cafeteria",
       foodType: "Buffet Items",
-      quantity: "60kg",
+      quantity: "60 kg",
       servings: "120",
-      distance: "4.2km",
+      distance: "4.2 km",
       expiry: "2 hours",
-      location: "101 Convention Blvd",
+      location: "Rajiv Gandhi Infotech Park, Phase 2, Hinjewadi",
       urgent: true,
     },
   ];
@@ -72,8 +72,8 @@ const Browse = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Browse Donations</h1>
-          <p className="text-muted-foreground text-lg">Find and accept food donations in your area</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Browse Donations in Pune</h1>
+          <p className="text-muted-foreground text-lg">Find and accept food donations across Pune and PCMC</p>
         </div>
 
         {/* Filters */}
@@ -118,10 +118,10 @@ const Browse = () => {
                   <SelectValue placeholder="Distance" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any Distance</SelectItem>
-                  <SelectItem value="1">Within 1km</SelectItem>
-                  <SelectItem value="5">Within 5km</SelectItem>
-                  <SelectItem value="10">Within 10km</SelectItem>
+                  <SelectItem value="all">Anywhere in Pune</SelectItem>
+                  <SelectItem value="1">Within 1 km</SelectItem>
+                  <SelectItem value="5">Within 5 km</SelectItem>
+                  <SelectItem value="10">Within 10 km</SelectItem>
                 </SelectContent>
               </Select>
             </div>

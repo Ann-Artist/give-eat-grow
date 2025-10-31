@@ -7,10 +7,10 @@ const Welcome = () => {
   const navigate = useNavigate();
 
   const stats = [
-    { icon: Heart, label: "Meals Served", value: "50K+" },
+    { icon: Heart, label: "Meals Served in Pune", value: "50K+" },
     { icon: Users, label: "Active Users", value: "2,500+" },
-    { icon: TrendingDown, label: "CO₂ Reduced", value: "100T" },
-    { icon: Award, label: "Partner NGOs", value: "120+" },
+    { icon: TrendingDown, label: "Food Waste Reduced", value: "100 Tonnes" },
+    { icon: Award, label: "Partner NGOs in Maharashtra", value: "120+" },
   ];
 
   return (
@@ -31,11 +31,11 @@ const Welcome = () => {
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
-              Connecting Surplus Food to Those in Need
+              Connecting Surplus Food to Those in Need Across Pune
             </p>
             
             <p className="text-lg text-muted-foreground max-w-xl">
-              Join a movement to reduce food waste, feed communities, and build a more sustainable future — one meal at a time.
+              Join Pune's movement to reduce food waste and feed our communities. Serving Koregaon Park, Viman Nagar, Hinjewadi, Kothrud, and all of PCMC.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
@@ -96,17 +96,17 @@ const Welcome = () => {
               {
                 step: "1",
                 title: "Donate",
-                description: "Restaurants, events, and households post surplus food with pickup details",
+                description: "Hotels, restaurants, and homes across Pune post surplus food with location and pickup timing",
               },
               {
                 step: "2",
                 title: "Connect",
-                description: "NGOs and volunteers browse and accept donations in their area",
+                description: "Registered NGOs and volunteers in your area receive alerts and accept donations",
               },
               {
                 step: "3",
                 title: "Impact",
-                description: "Track meals served, food saved, and environmental impact in real-time",
+                description: "Food reaches communities in need across Pune while reducing waste and carbon footprint",
               },
             ].map((item, index) => (
               <div 
@@ -126,10 +126,10 @@ const Welcome = () => {
         {/* CTA Section */}
         <div className="mt-24 bg-gradient-hero rounded-3xl p-12 text-center text-white shadow-soft">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Make a Difference?
+            Ready to Make a Difference in Pune?
           </h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Join thousands of caring individuals and organizations turning food waste into hope
+            Join thousands across Maharashtra turning food waste into hope and feeding our communities
           </p>
           <Button 
             size="lg"

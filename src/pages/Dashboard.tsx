@@ -9,7 +9,7 @@ const Dashboard = () => {
   const stats = [
     { 
       icon: Heart, 
-      label: "Meals Served", 
+      label: "Meals Served in Pune", 
       value: "1,247",
       change: "+12% this week",
       gradient: "from-primary to-primary/70"
@@ -17,20 +17,20 @@ const Dashboard = () => {
     { 
       icon: Package, 
       label: "Food Saved", 
-      value: "850kg",
+      value: "850 kg",
       change: "+8% this week",
       gradient: "from-accent to-accent/70"
     },
     { 
       icon: TrendingUp, 
-      label: "CO₂ Reduced", 
-      value: "2.5T",
+      label: "Waste Reduced", 
+      value: "2.5 Tonnes",
       change: "+15% this week",
       gradient: "from-primary to-accent"
     },
     { 
       icon: Users, 
-      label: "Active Users", 
+      label: "Active Users in PCMC", 
       value: "2,834",
       change: "+20% this week",
       gradient: "from-accent to-primary"
@@ -62,9 +62,9 @@ const Dashboard = () => {
   ];
 
   const recentActivity = [
-    { donor: "Green Valley Restaurant", amount: "25kg mixed vegetables", time: "2 hours ago", status: "completed" },
-    { donor: "Downtown Bakery", amount: "15kg bread & pastries", time: "3 hours ago", status: "in-progress" },
-    { donor: "City Event Center", amount: "40kg buffet items", time: "5 hours ago", status: "pending" },
+    { donor: "Koregaon Park Restaurant", amount: "25 kg mixed vegetables", time: "2 hours ago", status: "completed" },
+    { donor: "Viman Nagar Bakery", amount: "15 kg bread & pastries", time: "3 hours ago", status: "in-progress" },
+    { donor: "Hinjewadi IT Park Cafeteria", amount: "40 kg buffet items", time: "5 hours ago", status: "pending" },
   ];
 
   return (
@@ -162,9 +162,9 @@ const Dashboard = () => {
         {/* Motivational Banner */}
         <div className="mt-8 bg-gradient-hero rounded-2xl p-8 text-center text-white shadow-soft">
           <Heart className="w-12 h-12 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold mb-2">Every action makes a difference</h3>
+          <h3 className="text-2xl font-bold mb-2">Every action makes a difference in Pune</h3>
           <p className="opacity-90 max-w-2xl mx-auto">
-            You're part of a community that has saved over 850kg of food this week. Keep up the amazing work!
+            You're part of a community across Pune and PCMC that has saved over 850 kg of food this week. Keep up the amazing work!
           </p>
         </div>
       </div>

@@ -105,15 +105,16 @@ const Donate = () => {
               <div className="space-y-2">
                 <Label htmlFor="location">
                   <MapPin className="w-4 h-4 inline mr-2" />
-                  Pickup Location *
+                  Pickup Location in Pune *
                 </Label>
                 <Input 
                   id="location" 
                   type="text" 
-                  placeholder="Enter address or use current location"
+                  placeholder="e.g., Koregaon Park, Viman Nagar, Hinjewadi..."
                   required
                   className="h-12"
                 />
+                <p className="text-xs text-muted-foreground">Enter area/locality in Pune or PCMC</p>
               </div>
 
               {/* Expiry Time */}

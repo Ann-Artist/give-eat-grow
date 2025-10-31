@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Donate from "./pages/Donate";
 import Browse from "./pages/Browse";
 import Profile from "./pages/Profile";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/donate" element={<Donate />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

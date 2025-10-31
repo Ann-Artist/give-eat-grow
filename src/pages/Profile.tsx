@@ -26,9 +26,9 @@ const Profile = () => {
   ];
 
   const history = [
-    { date: "2024-01-15", type: "Donated", item: "25kg vegetables", location: "Green Valley Restaurant" },
-    { date: "2024-01-10", type: "Donated", item: "15kg bread", location: "Downtown Bakery" },
-    { date: "2024-01-05", type: "Donated", item: "40kg buffet items", location: "City Event Center" },
+    { date: "2024-01-15", type: "Donated", item: "25 kg vegetables", location: "Koregaon Park Restaurant" },
+    { date: "2024-01-10", type: "Donated", item: "15 kg bread", location: "Viman Nagar Bakery" },
+    { date: "2024-01-05", type: "Donated", item: "40 kg buffet items", location: "Hinjewadi IT Park" },
   ];
 
   return (
@@ -101,7 +101,7 @@ const Profile = () => {
                   <MapPin className="w-4 h-4 inline mr-2" />
                   Location
                 </Label>
-                <Input id="location" defaultValue="New York, NY" className="h-12" />
+                <Input id="location" defaultValue="Pune, Maharashtra" className="h-12" />
               </div>
             </div>
 
