@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      donations: {
+        Row: {
+          accepted_by: string | null
+          created_at: string
+          description: string | null
+          donor_id: string
+          expiry_hours: number
+          food_type: string
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          photo_url: string | null
+          quantity: string
+          servings: number | null
+          status: string | null
+          updated_at: string
+          urgent: boolean | null
+        }
+        Insert: {
+          accepted_by?: string | null
+          created_at?: string
+          description?: string | null
+          donor_id: string
+          expiry_hours: number
+          food_type: string
+          id?: string
+          latitude?: number | null
+          location: string
+          longitude?: number | null
+          photo_url?: string | null
+          quantity: string
+          servings?: number | null
+          status?: string | null
+          updated_at?: string
+          urgent?: boolean | null
+        }
+        Update: {
+          accepted_by?: string | null
+          created_at?: string
+          description?: string | null
+          donor_id?: string
+          expiry_hours?: number
+          food_type?: string
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          photo_url?: string | null
+          quantity?: string
+          servings?: number | null
+          status?: string | null
+          updated_at?: string
+          urgent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string
+          id: string
+          location: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          location?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          location?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +130,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "donor" | "ngo" | "volunteer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +257,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["donor", "ngo", "volunteer", "admin"],
+    },
   },
 } as const
