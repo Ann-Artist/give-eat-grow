@@ -1,24 +1,108 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Phone, MapPin, Award, Heart } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, MapPin, Award, Heart, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase, type Profile as ProfileType } from "@/lib/supabase";
+import { Badge } from "@/components/ui/badge";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut, loading } = useAuth();
   const [notifications, setNotifications] = useState(true);
+  const [profile, setProfile] = useState<ProfileType | null>(null);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    phone: "",
+    location: "",
+  });
 
-  const handleSave = () => {
-    toast({
-      title: "Profile Updated",
-      description: "Your changes have been saved successfully.",
-    });
+  useEffect(() => {
+    if (!user && !loading) {
+      navigate("/auth");
+    } else if (user) {
+      fetchProfile();
+    }
+  }, [user, loading, navigate]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setProfile(data);
+        setFormData({
+          full_name: data.full_name || "",
+          phone: data.phone || "",
+          location: data.location || "",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
   };
+
+  const handleLogout = async () => {
+    const { error } = await signOut();
+    if (!error) {
+      toast({
+        title: "Logged Out",
+        description: "You have been logged out successfully.",
+      });
+      navigate("/");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user || !profile) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: formData.full_name,
+          phone: formData.phone,
+          location: formData.location,
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Profile Updated",
+        description: "Your changes have been saved successfully.",
+      });
+      fetchProfile();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading || !profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center">
+        <p className="text-lg">Loading profile...</p>
+      </div>
+    );
+  }
 
   const stats = [
     { icon: Heart, label: "Donations Made", value: "24" },
@@ -43,7 +127,19 @@ const Profile = () => {
           Back to Dashboard
         </Button>
 
-        <h1 className="text-3xl md:text-4xl font-bold mb-8">Profile & Settings</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold">Profile & Settings</h1>
+            <div className="flex items-center gap-3 mt-2">
+              <p className="text-muted-foreground">Logged in as {user?.email}</p>
+              <Badge variant="outline" className="capitalize">{profile.role}</Badge>
+            </div>
+          </div>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -77,7 +173,12 @@ const Profile = () => {
                   <User className="w-4 h-4 inline mr-2" />
                   Full Name
                 </Label>
-                <Input id="name" defaultValue="John Doe" className="h-12" />
+                <Input 
+                  id="name" 
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                  className="h-12" 
+                />
               </div>
 
               <div className="space-y-2">
@@ -85,7 +186,7 @@ const Profile = () => {
                   <Mail className="w-4 h-4 inline mr-2" />
                   Email
                 </Label>
-                <Input id="email" type="email" defaultValue="john@example.com" className="h-12" />
+                <Input id="email" type="email" value={user?.email || ""} className="h-12" disabled />
               </div>
 
               <div className="space-y-2">
@@ -93,7 +194,13 @@ const Profile = () => {
                   <Phone className="w-4 h-4 inline mr-2" />
                   Phone
                 </Label>
-                <Input id="phone" type="tel" defaultValue="+1 234 567 8900" className="h-12" />
+                <Input 
+                  id="phone" 
+                  type="tel" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="h-12" 
+                />
               </div>
 
               <div className="space-y-2">
@@ -101,7 +208,13 @@ const Profile = () => {
                   <MapPin className="w-4 h-4 inline mr-2" />
                   Location
                 </Label>
-                <Input id="location" defaultValue="Pune, Maharashtra" className="h-12" />
+                <Input 
+                  id="location" 
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  placeholder="e.g. Koregaon Park, Pune"
+                  className="h-12" 
+                />
               </div>
             </div>
 

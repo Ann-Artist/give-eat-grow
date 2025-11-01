@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,12 +7,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { Heart, Building2, Users as UsersIcon, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signIn, signUp, loading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<string>("donor");
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user && !loading) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
 
   const roles = [
     { id: "donor", label: "Donor", icon: Heart, description: "Share surplus food" },
@@ -21,15 +33,49 @@ const Auth = () => {
     { id: "admin", label: "Admin", icon: ShieldCheck, description: "Manage platform" },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    toast({
-      title: isLogin ? "Welcome back!" : "Account created!",
-      description: `Logged in as ${selectedRole}`,
-    });
-    
-    navigate("/dashboard");
+    setIsSubmitting(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast({
+            title: "Login Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "Successfully logged in.",
+          });
+        }
+      } else {
+        const { error } = await signUp(email, password, fullName, selectedRole);
+        if (error) {
+          toast({
+            title: "Signup Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Account Created!",
+            description: "Welcome to FoodLink Pune.",
+          });
+        }
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -91,6 +137,8 @@ const Auth = () => {
                     placeholder="you@example.com"
                     required
                     className="h-12"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
@@ -102,6 +150,8 @@ const Auth = () => {
                     placeholder="••••••••"
                     required
                     className="h-12"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
 
@@ -114,6 +164,8 @@ const Auth = () => {
                       placeholder="Your name"
                       required
                       className="h-12"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
                     />
                   </div>
                 )}
@@ -121,8 +173,9 @@ const Auth = () => {
                 <Button 
                   type="submit" 
                   className="w-full h-12 text-base shadow-soft hover:shadow-lg transition-all"
+                  disabled={isSubmitting}
                 >
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {isSubmitting ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
                 </Button>
 
                 {isLogin && (

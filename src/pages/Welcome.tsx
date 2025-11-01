@@ -35,7 +35,7 @@ const Welcome = () => {
             </p>
             
             <p className="text-lg text-muted-foreground max-w-xl">
-              Join Pune's movement to reduce food waste and feed our communities. Serving Koregaon Park, Viman Nagar, Hinjewadi, Kothrud, and all of PCMC.
+              Join Pune's movement to reduce food waste and feed our communities. From restaurants, hotels, schools, colleges, office canteens to households across Pune and PCMC.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">

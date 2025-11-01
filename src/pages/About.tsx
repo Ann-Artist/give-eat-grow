@@ -42,7 +42,7 @@ const About = () => {
               <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
                 FoodLink Pune is dedicated to reducing food waste and feeding communities across 
-                Pune, Pimpri-Chinchwad, and surrounding areas in Maharashtra. We connect restaurants, 
+                Pune, Pimpri-Chinchwad, and surrounding areas in Maharashtra. We connect restaurants, hotels, schools, colleges, office canteens,
                 event venues, hotels, and households with NGOs, volunteers, and charitable organizations 
                 to ensure surplus food reaches those who need it most.
               </p>

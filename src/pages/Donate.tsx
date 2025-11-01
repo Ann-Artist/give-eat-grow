@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,11 +8,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 
 const Donate = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading } = useAuth();
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    foodType: "",
+    quantity: "",
+    servings: "",
+    location: "",
+    expiryHours: "",
+    description: "",
+  });
+
+  useEffect(() => {
+    if (!user && !loading) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -25,15 +43,53 @@ const Donate = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     
-    toast({
-      title: "Donation Posted!",
-      description: "Your food donation is now live. NGOs and volunteers will be notified.",
-    });
-    
-    navigate("/dashboard");
+    setIsSubmitting(true);
+
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) throw new Error("Profile not found");
+
+      const { error } = await supabase
+        .from('donations')
+        .insert({
+          donor_id: profile.id,
+          food_type: formData.foodType,
+          quantity: formData.quantity,
+          servings: formData.servings ? parseInt(formData.servings) : null,
+          location: formData.location,
+          expiry_hours: parseInt(formData.expiryHours),
+          description: formData.description,
+          status: 'available',
+          urgent: parseInt(formData.expiryHours) <= 4,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Donation Posted!",
+        description: "Your food donation is now live. NGOs and volunteers will be notified.",
+      });
+      
+      navigate("/dashboard");
+    } catch (error) {
+      console.error('Error posting donation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to post donation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -61,17 +117,18 @@ const Donate = () => {
               {/* Food Type */}
               <div className="space-y-2">
                 <Label htmlFor="foodType">Food Type *</Label>
-                <Select required>
+                <Select required value={formData.foodType} onValueChange={(value) => setFormData({...formData, foodType: value})}>
                   <SelectTrigger id="foodType" className="h-12">
                     <SelectValue placeholder="Select food category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="prepared">Prepared Meals</SelectItem>
-                    <SelectItem value="vegetables">Vegetables & Fruits</SelectItem>
-                    <SelectItem value="grains">Grains & Bread</SelectItem>
-                    <SelectItem value="dairy">Dairy Products</SelectItem>
-                    <SelectItem value="packaged">Packaged Food</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="Prepared Meals">Prepared Meals</SelectItem>
+                    <SelectItem value="Vegetables & Fruits">Vegetables & Fruits</SelectItem>
+                    <SelectItem value="Bread & Pastries">Bread & Pastries</SelectItem>
+                    <SelectItem value="Dairy Products">Dairy Products</SelectItem>
+                    <SelectItem value="Canteen Food">Canteen Food</SelectItem>
+                    <SelectItem value="Buffet Items">Buffet Items</SelectItem>
+                    <SelectItem value="Packaged Food">Packaged Food</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -79,14 +136,15 @@ const Donate = () => {
               {/* Quantity */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="quantity">Quantity (kg) *</Label>
+                  <Label htmlFor="quantity">Quantity *</Label>
                   <Input 
                     id="quantity" 
-                    type="number" 
-                    placeholder="e.g., 10"
+                    type="text" 
+                    placeholder="e.g., 10 kg, 25 kg"
                     required
-                    min="1"
                     className="h-12"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({...formData, quantity: e.target.value})}
                   />
                 </div>
 
@@ -97,6 +155,8 @@ const Donate = () => {
                     type="number" 
                     placeholder="e.g., 20"
                     className="h-12"
+                    value={formData.servings}
+                    onChange={(e) => setFormData({...formData, servings: e.target.value})}
                   />
                 </div>
               </div>
@@ -110,25 +170,33 @@ const Donate = () => {
                 <Input 
                   id="location" 
                   type="text" 
-                  placeholder="e.g., Koregaon Park, Viman Nagar, Hinjewadi..."
+                  placeholder="e.g., Koregaon Park, Viman Nagar, Hinjewadi, School/College Canteen..."
                   required
                   className="h-12"
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
                 />
-                <p className="text-xs text-muted-foreground">Enter area/locality in Pune or PCMC</p>
+                <p className="text-xs text-muted-foreground">Enter area/locality in Pune or PCMC (restaurants, canteens, homes, etc.)</p>
               </div>
 
               {/* Expiry Time */}
               <div className="space-y-2">
                 <Label htmlFor="expiry">
                   <Clock className="w-4 h-4 inline mr-2" />
-                  Best Before / Pickup By *
+                  Expires In (hours) *
                 </Label>
                 <Input 
                   id="expiry" 
-                  type="datetime-local" 
+                  type="number" 
+                  placeholder="e.g., 4"
                   required
                   className="h-12"
+                  min="1"
+                  max="48"
+                  value={formData.expiryHours}
+                  onChange={(e) => setFormData({...formData, expiryHours: e.target.value})}
                 />
+                <p className="text-xs text-muted-foreground">Items expiring in 4 hours or less are marked as urgent</p>
               </div>
 
               {/* Description */}
@@ -139,6 +207,8 @@ const Donate = () => {
                   placeholder="Any special instructions, dietary information, or storage requirements..."
                   rows={4}
                   className="resize-none"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
 
@@ -175,8 +245,9 @@ const Donate = () => {
                 <Button 
                   type="submit" 
                   className="w-full h-14 text-lg shadow-soft hover:shadow-lg transition-all"
+                  disabled={isSubmitting}
                 >
-                  Post Donation
+                  {isSubmitting ? "Posting..." : "Post Donation"}
                 </Button>
               </div>
             </form>
