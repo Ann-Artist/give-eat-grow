@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Heart, Users, TrendingDown, Award } from "lucide-react";
 import heroImage from "@/assets/hero-community.jpg";
+import Navigation from "@/components/Navigation";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <Navigation />
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row items-center gap-12 min-h-[80vh]">

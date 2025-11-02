@@ -2,9 +2,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Heart, MapPin, TrendingUp, Users, Plus, Search, Package } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase, type Donation } from "@/lib/supabase";
+import Navigation from "@/components/Navigation";
+import { formatDistanceToNow } from "date-fns";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [recentDonations, setRecentDonations] = useState<Donation[]>([]);
+
+  useEffect(() => {
+    const fetchRecentDonations = async () => {
+      const { data } = await supabase
+        .from("donations")
+        .select("*, profiles!donations_donor_id_fkey(*)")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      
+      if (data) setRecentDonations(data as unknown as Donation[]);
+    };
+
+    fetchRecentDonations();
+  }, []);
 
   const stats = [
     { 
@@ -61,14 +80,10 @@ const Dashboard = () => {
     },
   ];
 
-  const recentActivity = [
-    { donor: "Koregaon Park Restaurant", amount: "25 kg mixed vegetables", time: "2 hours ago", status: "completed" },
-    { donor: "Viman Nagar Bakery", amount: "15 kg bread & pastries", time: "3 hours ago", status: "in-progress" },
-    { donor: "Hinjewadi IT Park Cafeteria", amount: "40 kg buffet items", time: "5 hours ago", status: "pending" },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -135,26 +150,35 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div 
-                  key={index}
-                  className="flex items-start justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold mb-1">{activity.donor}</p>
-                    <p className="text-sm text-muted-foreground mb-2">{activity.amount}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+              {recentDonations.length > 0 ? (
+                recentDonations.map((donation) => (
+                  <div 
+                    key={donation.id}
+                    className="flex items-start justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold mb-1">{donation.profiles?.full_name || "Anonymous"}</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {donation.quantity} {donation.food_type}
+                        {donation.servings && ` • ${donation.servings} servings`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(donation.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      donation.status === 'completed' ? 'bg-primary/10 text-primary' :
+                      donation.status === 'accepted' ? 'bg-accent/20 text-accent-foreground' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      {donation.status === 'completed' ? 'Completed' :
+                       donation.status === 'accepted' ? 'Accepted' : 'Available'}
+                    </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    activity.status === 'completed' ? 'bg-primary/10 text-primary' :
-                    activity.status === 'in-progress' ? 'bg-accent/20 text-accent-foreground' :
-                    'bg-muted text-muted-foreground'
-                  }`}>
-                    {activity.status === 'completed' ? 'Completed' :
-                     activity.status === 'in-progress' ? 'In Progress' : 'Pending'}
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-4">No recent donations</p>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase, type Profile as ProfileType } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
+import Navigation from "@/components/Navigation";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -117,6 +118,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <Navigation />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Button 
           variant="ghost" 

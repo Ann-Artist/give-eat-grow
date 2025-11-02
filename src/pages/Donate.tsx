@@ -10,6 +10,7 @@ import { ArrowLeft, Upload, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
+import Navigation from "@/components/Navigation";
 
 const Donate = () => {
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ const Donate = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <Navigation />
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <Button 
           variant="ghost" 
