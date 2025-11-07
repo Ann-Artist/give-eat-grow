@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { Search, MapPin, Clock, Package, Navigation as NavigationIcon } from "lucide-react";
+import { Search, MapPin, Clock, Package, Navigation as NavigationIcon, ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase, type Donation } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
@@ -140,6 +140,15 @@ const BrowseNew = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/dashboard")}
+          className="mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
+        </Button>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Browse Donations in Pune</h1>
