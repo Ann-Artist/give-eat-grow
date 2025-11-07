@@ -4,11 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, MapPin, Clock, Package, Navigation } from "lucide-react";
+import { Search, MapPin, Clock, Package, Navigation as NavigationIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase, type Donation } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import Navigation from "@/components/Navigation";
 
 const BrowseNew = () => {
   const navigate = useNavigate();
@@ -93,6 +94,11 @@ const BrowseNew = () => {
     }
   };
 
+  const openGoogleMaps = (location: string) => {
+    const encodedLocation = encodeURIComponent(`${location}, Pune`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedLocation}`, '_blank');
+  };
+
   const getTimeSince = (timestamp: string) => {
     const now = new Date();
     const created = new Date(timestamp);
@@ -134,15 +140,6 @@ const BrowseNew = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/dashboard")}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Browse Donations in Pune</h1>
@@ -283,8 +280,12 @@ const BrowseNew = () => {
                     >
                       Accept Donation
                     </Button>
-                    <Button variant="outline" className="flex-1">
-                      <Navigation className="w-4 h-4 mr-2" />
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => openGoogleMaps(donation.location)}
+                    >
+                      <NavigationIcon className="w-4 h-4 mr-2" />
                       Navigate
                     </Button>
                   </div>
