@@ -17,6 +17,7 @@ const Donate = () => {
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     foodType: "",
@@ -36,6 +37,7 @@ const Donate = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -59,6 +61,31 @@ const Donate = () => {
 
       if (!profile) throw new Error("Profile not found");
 
+      let photoUrl: string | null = null;
+
+      // Upload image if one was selected
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('donation-photos')
+          .upload(filePath, imageFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('donation-photos')
+          .getPublicUrl(filePath);
+        
+        photoUrl = publicUrl;
+      }
+
       const { error } = await supabase
         .from('donations')
         .insert({
@@ -69,6 +96,7 @@ const Donate = () => {
           location: formData.location,
           expiry_hours: parseInt(formData.expiryHours),
           description: formData.description,
+          photo_url: photoUrl,
           status: 'available',
           urgent: parseInt(formData.expiryHours) <= 4,
         });
