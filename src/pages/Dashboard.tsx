@@ -157,7 +157,10 @@ const Dashboard = () => {
                     className="flex items-start justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex-1">
-                      <p className="font-semibold mb-1">{donation.profiles?.full_name || "Anonymous"}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <p className="font-semibold">{donation.location}</p>
+                      </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {donation.quantity} {donation.food_type}
                         {donation.servings && ` • ${donation.servings} servings`}

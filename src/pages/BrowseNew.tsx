@@ -211,6 +211,17 @@ const BrowseNew = () => {
             >
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row gap-6">
+                  {/* Image */}
+                  {donation.photo_url && (
+                    <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
+                      <img 
+                        src={donation.photo_url} 
+                        alt={donation.food_type}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
                   {/* Left: Info */}
                   <div className="flex-1 space-y-3">
                     <div className="flex items-start justify-between gap-4">

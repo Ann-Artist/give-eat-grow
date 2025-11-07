@@ -119,20 +119,16 @@ const Donate = () => {
               {/* Food Type */}
               <div className="space-y-2">
                 <Label htmlFor="foodType">Food Type *</Label>
-                <Select required value={formData.foodType} onValueChange={(value) => setFormData({...formData, foodType: value})}>
-                  <SelectTrigger id="foodType" className="h-12">
-                    <SelectValue placeholder="Select food category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Prepared Meals">Prepared Meals</SelectItem>
-                    <SelectItem value="Vegetables & Fruits">Vegetables & Fruits</SelectItem>
-                    <SelectItem value="Bread & Pastries">Bread & Pastries</SelectItem>
-                    <SelectItem value="Dairy Products">Dairy Products</SelectItem>
-                    <SelectItem value="Canteen Food">Canteen Food</SelectItem>
-                    <SelectItem value="Buffet Items">Buffet Items</SelectItem>
-                    <SelectItem value="Packaged Food">Packaged Food</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input 
+                  id="foodType" 
+                  type="text" 
+                  placeholder="e.g., Dal chawal, Biryani, Roti sabzi..."
+                  required
+                  className="h-12"
+                  value={formData.foodType}
+                  onChange={(e) => setFormData({...formData, foodType: e.target.value})}
+                />
+                <p className="text-xs text-muted-foreground">Enter the specific food items you're donating</p>
               </div>
 
               {/* Quantity */}
