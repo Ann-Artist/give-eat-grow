@@ -158,6 +158,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      delete_expired_donations: { Args: never; Returns: number }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
     }
     Enums: {
