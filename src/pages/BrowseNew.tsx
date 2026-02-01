@@ -11,11 +11,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 
+// Extended donation type with profile info
+type DonationWithProfile = Donation & { profiles?: { full_name: string } | null };
+
 const BrowseNew = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [donations, setDonations] = useState<Donation[]>([]);
+  const [donations, setDonations] = useState<DonationWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [foodTypeFilter, setFoodTypeFilter] = useState("all");
@@ -30,12 +33,19 @@ const BrowseNew = () => {
     try {
       const { data, error } = await supabase
         .from('donations')
-        .select('*')
+        .select('*, profiles!donations_donor_id_fkey(full_name)')
         .eq('status', 'available')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDonations((data || []) as Donation[]);
+      // Filter out expired donations client-side
+      const now = new Date();
+      const validDonations = (data || []).filter((donation) => {
+        const createdAt = new Date(donation.created_at);
+        const expiryTime = new Date(createdAt.getTime() + donation.expiry_hours * 60 * 60 * 1000);
+        return expiryTime > now;
+      }) as DonationWithProfile[];
+      setDonations(validDonations);
     } catch (error) {
       if (import.meta.env.DEV) console.error('Error fetching donations:', error);
       toast({
@@ -94,9 +104,17 @@ const BrowseNew = () => {
     }
   };
 
-  const openGoogleMaps = (location: string) => {
-    const encodedLocation = encodeURIComponent(`${location}, Pune`);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedLocation}`, '_blank');
+  const openGoogleMaps = (donation: DonationWithProfile) => {
+    let url: string;
+    if (donation.latitude && donation.longitude) {
+      // Use exact coordinates if available
+      url = `https://www.google.com/maps/search/?api=1&query=${donation.latitude},${donation.longitude}`;
+    } else {
+      // Fall back to location name search
+      const encodedLocation = encodeURIComponent(`${donation.location}, Pune, India`);
+      url = `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`;
+    }
+    window.open(url, '_blank');
   };
 
   const getTimeSince = (timestamp: string) => {
@@ -232,8 +250,14 @@ const BrowseNew = () => {
                   <div className="flex-1 space-y-3">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="text-xl font-semibold mb-1">{donation.location}</h3>
+                        <h3 className="text-xl font-semibold mb-1">
+                          {donation.profiles?.full_name || 'Anonymous Donor'}
+                        </h3>
                         <p className="text-muted-foreground">{donation.food_type}</p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {donation.location}
+                        </p>
                       </div>
                       {donation.urgent && (
                         <Badge className="bg-destructive text-destructive-foreground">
@@ -292,7 +316,7 @@ const BrowseNew = () => {
                     <Button 
                       variant="outline" 
                       className="flex-1"
-                      onClick={() => openGoogleMaps(donation.location)}
+                      onClick={() => openGoogleMaps(donation)}
                     >
                       <NavigationIcon className="w-4 h-4 mr-2" />
                       Navigate

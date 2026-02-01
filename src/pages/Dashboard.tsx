@@ -7,19 +7,30 @@ import { supabase, type Donation } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
 import { formatDistanceToNow } from "date-fns";
 
+// Extended donation type with profile info
+type DonationWithProfile = Donation & { profiles?: { full_name: string } | null };
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [recentDonations, setRecentDonations] = useState<Donation[]>([]);
+  const [recentDonations, setRecentDonations] = useState<DonationWithProfile[]>([]);
 
   useEffect(() => {
     const fetchRecentDonations = async () => {
       const { data } = await supabase
         .from("donations")
-        .select("*, profiles!donations_donor_id_fkey(*)")
+        .select("*, profiles!donations_donor_id_fkey(full_name)")
         .order("created_at", { ascending: false })
         .limit(5);
       
-      if (data) setRecentDonations(data as unknown as Donation[]);
+      // Filter out expired donations
+      const now = new Date();
+      const validDonations = (data || []).filter((donation) => {
+        const createdAt = new Date(donation.created_at);
+        const expiryTime = new Date(createdAt.getTime() + donation.expiry_hours * 60 * 60 * 1000);
+        return expiryTime > now;
+      }) as DonationWithProfile[];
+      
+      setRecentDonations(validDonations);
     };
 
     fetchRecentDonations();
@@ -157,9 +168,12 @@ const Dashboard = () => {
                     className="flex items-start justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex-1">
+                      <p className="font-semibold mb-1">
+                        {donation.profiles?.full_name || 'Anonymous Donor'}
+                      </p>
                       <div className="flex items-center gap-2 mb-1">
                         <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <p className="font-semibold">{donation.location}</p>
+                        <p className="text-sm text-muted-foreground">{donation.location}</p>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {donation.quantity} {donation.food_type}
