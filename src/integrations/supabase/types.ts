@@ -148,7 +148,78 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      available_donations_public: {
+        Row: {
+          accepted_by: string | null
+          created_at: string | null
+          description: string | null
+          donor_id: string | null
+          expiry_hours: number | null
+          food_type: string | null
+          id: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          photo_url: string | null
+          quantity: string | null
+          servings: number | null
+          status: string | null
+          updated_at: string | null
+          urgent: boolean | null
+        }
+        Insert: {
+          accepted_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          donor_id?: string | null
+          expiry_hours?: number | null
+          food_type?: string | null
+          id?: string | null
+          latitude?: never
+          location?: never
+          longitude?: never
+          photo_url?: string | null
+          quantity?: string | null
+          servings?: number | null
+          status?: string | null
+          updated_at?: string | null
+          urgent?: boolean | null
+        }
+        Update: {
+          accepted_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          donor_id?: string | null
+          expiry_hours?: number | null
+          food_type?: string | null
+          id?: string | null
+          latitude?: never
+          location?: never
+          longitude?: never
+          photo_url?: string | null
+          quantity?: string | null
+          servings?: number | null
+          status?: string | null
+          updated_at?: string | null
+          urgent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assign_user_role: {
