@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase, type Profile as ProfileType } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
+import { profileSchema } from "@/lib/validation/profileSchema";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -23,6 +24,11 @@ const Profile = () => {
     phone: "",
     location: "",
   });
+  const [formErrors, setFormErrors] = useState<{
+    full_name?: string;
+    phone?: string;
+    location?: string;
+  }>({});
 
   useEffect(() => {
     if (!user && !loading) {
@@ -70,13 +76,34 @@ const Profile = () => {
   const handleSave = async () => {
     if (!user || !profile) return;
 
+    // Clear previous errors
+    setFormErrors({});
+
+    // Validate form data with Zod schema
+    const validationResult = profileSchema.safeParse(formData);
+    
+    if (!validationResult.success) {
+      const errors: typeof formErrors = {};
+      validationResult.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof typeof formErrors;
+        errors[field] = err.message;
+      });
+      setFormErrors(errors);
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          location: formData.location,
+          full_name: validationResult.data.full_name,
+          phone: validationResult.data.phone || null,
+          location: validationResult.data.location || null,
         })
         .eq('user_id', user.id);
 
@@ -178,9 +205,16 @@ const Profile = () => {
                 <Input 
                   id="name" 
                   value={formData.full_name}
-                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                  className="h-12" 
+                  onChange={(e) => {
+                    setFormData({...formData, full_name: e.target.value});
+                    if (formErrors.full_name) setFormErrors({...formErrors, full_name: undefined});
+                  }}
+                  className={`h-12 ${formErrors.full_name ? 'border-destructive' : ''}`}
+                  maxLength={100}
                 />
+                {formErrors.full_name && (
+                  <p className="text-sm text-destructive">{formErrors.full_name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -200,9 +234,16 @@ const Profile = () => {
                   id="phone" 
                   type="tel" 
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="h-12" 
+                  onChange={(e) => {
+                    setFormData({...formData, phone: e.target.value});
+                    if (formErrors.phone) setFormErrors({...formErrors, phone: undefined});
+                  }}
+                  className={`h-12 ${formErrors.phone ? 'border-destructive' : ''}`}
+                  maxLength={20}
                 />
+                {formErrors.phone && (
+                  <p className="text-sm text-destructive">{formErrors.phone}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -213,10 +254,17 @@ const Profile = () => {
                 <Input 
                   id="location" 
                   value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({...formData, location: e.target.value});
+                    if (formErrors.location) setFormErrors({...formErrors, location: undefined});
+                  }}
                   placeholder="e.g. Koregaon Park, Pune"
-                  className="h-12" 
+                  className={`h-12 ${formErrors.location ? 'border-destructive' : ''}`}
+                  maxLength={200}
                 />
+                {formErrors.location && (
+                  <p className="text-sm text-destructive">{formErrors.location}</p>
+                )}
               </div>
             </div>
 
