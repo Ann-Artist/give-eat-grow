@@ -52,7 +52,7 @@ const Profile = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      if (import.meta.env.DEV) console.error('Error fetching profile:', error);
     }
   };
 
@@ -88,7 +88,7 @@ const Profile = () => {
       });
       fetchProfile();
     } catch (error) {
-      console.error('Error updating profile:', error);
+      if (import.meta.env.DEV) console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile",

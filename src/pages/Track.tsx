@@ -46,7 +46,7 @@ const Track = () => {
       if (error) throw error;
       setActiveDeliveries((data || []) as unknown as Donation[]);
     } catch (error) {
-      console.error('Error fetching deliveries:', error);
+      if (import.meta.env.DEV) console.error('Error fetching deliveries:', error);
       toast({
         title: "Error",
         description: "Failed to load deliveries",
@@ -73,7 +73,7 @@ const Track = () => {
       
       fetchActiveDeliveries();
     } catch (error) {
-      console.error('Error completing delivery:', error);
+      if (import.meta.env.DEV) console.error('Error completing delivery:', error);
       toast({
         title: "Error",
         description: "Failed to complete delivery",
