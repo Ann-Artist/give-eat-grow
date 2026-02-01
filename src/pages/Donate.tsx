@@ -4,13 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
+import { donationSchema, validateImageFile } from "@/lib/validation/donationSchema";
 
 const Donate = () => {
   const navigate = useNavigate();
@@ -34,9 +34,23 @@ const Donate = () => {
     }
   }, [user, loading, navigate]);
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate image file
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        toast({
+          title: "Invalid Image",
+          description: validation.error,
+          variant: "destructive",
+        });
+        e.target.value = ''; // Reset input
+        return;
+      }
+      
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -50,6 +64,26 @@ const Donate = () => {
     e.preventDefault();
     if (!user) return;
     
+    // Validate form data with Zod
+    const validationResult = donationSchema.safeParse(formData);
+    
+    if (!validationResult.success) {
+      const errors: Record<string, string> = {};
+      validationResult.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          errors[err.path[0] as string] = err.message;
+        }
+      });
+      setFormErrors(errors);
+      toast({
+        title: "Validation Error",
+        description: "Please fix the form errors before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setFormErrors({});
     setIsSubmitting(true);
 
     try {
@@ -61,17 +95,20 @@ const Donate = () => {
 
       if (!profile) throw new Error("Profile not found");
 
+      // Use validated and sanitized data
+      const validatedData = validationResult.data;
+
       let photoUrl: string | null = null;
 
       // Upload image if one was selected
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        const fileExt = imageFile.name.split('.').pop()?.toLowerCase();
+        // Use user.id for folder structure to enable proper RLS ownership checks
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('donation-photos')
-          .upload(filePath, imageFile);
+          .upload(fileName, imageFile);
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
@@ -81,7 +118,7 @@ const Donate = () => {
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('donation-photos')
-          .getPublicUrl(filePath);
+          .getPublicUrl(fileName);
         
         photoUrl = publicUrl;
       }
@@ -90,15 +127,15 @@ const Donate = () => {
         .from('donations')
         .insert({
           donor_id: profile.id,
-          food_type: formData.foodType,
-          quantity: formData.quantity,
-          servings: formData.servings ? parseInt(formData.servings) : null,
-          location: formData.location,
-          expiry_hours: parseInt(formData.expiryHours),
-          description: formData.description,
+          food_type: validatedData.foodType,
+          quantity: validatedData.quantity,
+          servings: validatedData.servings ? parseInt(validatedData.servings) : null,
+          location: validatedData.location,
+          expiry_hours: parseInt(validatedData.expiryHours),
+          description: validatedData.description || null,
           photo_url: photoUrl,
           status: 'available',
-          urgent: parseInt(formData.expiryHours) <= 4,
+          urgent: parseInt(validatedData.expiryHours) <= 4,
         });
 
       if (error) throw error;
@@ -152,11 +189,13 @@ const Donate = () => {
                   type="text" 
                   placeholder="e.g., Dal chawal, Biryani, Roti sabzi..."
                   required
-                  className="h-12"
+                  maxLength={100}
+                  className={`h-12 ${formErrors.foodType ? 'border-destructive' : ''}`}
                   value={formData.foodType}
                   onChange={(e) => setFormData({...formData, foodType: e.target.value})}
                 />
-                <p className="text-xs text-muted-foreground">Enter the specific food items you're donating</p>
+                {formErrors.foodType && <p className="text-xs text-destructive">{formErrors.foodType}</p>}
+                <p className="text-xs text-muted-foreground">Enter the specific food items you're donating (max 100 chars)</p>
               </div>
 
               {/* Quantity */}
@@ -168,10 +207,12 @@ const Donate = () => {
                     type="text" 
                     placeholder="e.g., 10 kg, 25 kg"
                     required
-                    className="h-12"
+                    maxLength={50}
+                    className={`h-12 ${formErrors.quantity ? 'border-destructive' : ''}`}
                     value={formData.quantity}
                     onChange={(e) => setFormData({...formData, quantity: e.target.value})}
                   />
+                  {formErrors.quantity && <p className="text-xs text-destructive">{formErrors.quantity}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -180,10 +221,13 @@ const Donate = () => {
                     id="servings" 
                     type="number" 
                     placeholder="e.g., 20"
-                    className="h-12"
+                    min={1}
+                    max={1000}
+                    className={`h-12 ${formErrors.servings ? 'border-destructive' : ''}`}
                     value={formData.servings}
                     onChange={(e) => setFormData({...formData, servings: e.target.value})}
                   />
+                  {formErrors.servings && <p className="text-xs text-destructive">{formErrors.servings}</p>}
                 </div>
               </div>
 
@@ -198,11 +242,13 @@ const Donate = () => {
                   type="text" 
                   placeholder="e.g., Koregaon Park, Viman Nagar, Hinjewadi, School/College Canteen..."
                   required
-                  className="h-12"
+                  maxLength={200}
+                  className={`h-12 ${formErrors.location ? 'border-destructive' : ''}`}
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                 />
-                <p className="text-xs text-muted-foreground">Enter area/locality in Pune or PCMC (restaurants, canteens, homes, etc.)</p>
+                {formErrors.location && <p className="text-xs text-destructive">{formErrors.location}</p>}
+                <p className="text-xs text-muted-foreground">Enter area/locality in Pune or PCMC (max 200 chars)</p>
               </div>
 
               {/* Expiry Time */}
@@ -216,12 +262,13 @@ const Donate = () => {
                   type="number" 
                   placeholder="e.g., 4"
                   required
-                  className="h-12"
-                  min="1"
-                  max="48"
+                  className={`h-12 ${formErrors.expiryHours ? 'border-destructive' : ''}`}
+                  min={1}
+                  max={48}
                   value={formData.expiryHours}
                   onChange={(e) => setFormData({...formData, expiryHours: e.target.value})}
                 />
+                {formErrors.expiryHours && <p className="text-xs text-destructive">{formErrors.expiryHours}</p>}
                 <p className="text-xs text-muted-foreground">Items expiring in 4 hours or less are marked as urgent</p>
               </div>
 
@@ -232,10 +279,13 @@ const Donate = () => {
                   id="notes" 
                   placeholder="Any special instructions, dietary information, or storage requirements..."
                   rows={4}
-                  className="resize-none"
+                  maxLength={1000}
+                  className={`resize-none ${formErrors.description ? 'border-destructive' : ''}`}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
+                {formErrors.description && <p className="text-xs text-destructive">{formErrors.description}</p>}
+                <p className="text-xs text-muted-foreground">{formData.description.length}/1000 characters</p>
               </div>
 
               {/* Image Upload */}
