@@ -111,7 +111,7 @@ const Donate = () => {
           .upload(fileName, imageFile);
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+          if (import.meta.env.DEV) console.error('Upload error:', uploadError);
           throw uploadError;
         }
 
@@ -147,7 +147,7 @@ const Donate = () => {
       
       navigate("/dashboard");
     } catch (error) {
-      console.error('Error posting donation:', error);
+      if (import.meta.env.DEV) console.error('Error posting donation:', error);
       toast({
         title: "Error",
         description: "Failed to post donation. Please try again.",

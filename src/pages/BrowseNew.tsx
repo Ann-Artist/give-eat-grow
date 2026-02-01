@@ -37,7 +37,7 @@ const BrowseNew = () => {
       if (error) throw error;
       setDonations((data || []) as Donation[]);
     } catch (error) {
-      console.error('Error fetching donations:', error);
+      if (import.meta.env.DEV) console.error('Error fetching donations:', error);
       toast({
         title: "Error",
         description: "Failed to load donations",
@@ -85,7 +85,7 @@ const BrowseNew = () => {
       
       fetchDonations();
     } catch (error) {
-      console.error('Error accepting donation:', error);
+      if (import.meta.env.DEV) console.error('Error accepting donation:', error);
       toast({
         title: "Error",
         description: "Failed to accept donation",
